@@ -4,6 +4,8 @@ import time
 import os
 import math
 
+# require pillow
+
 class VectorCompare:
     def magnitude(self,concordance):
         total = 0
