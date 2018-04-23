@@ -5,6 +5,7 @@ import os
 import math
 
 # require pillow
+# 提取图片验证码
 
 class VectorCompare:
     def magnitude(self,concordance):
