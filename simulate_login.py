@@ -5,6 +5,7 @@ import json
 import os
 import extract_images
 import time
+import code
 
 
 
@@ -24,38 +25,40 @@ def login():
         login_name = account_dist['username']
         login_password = account_dist['password']
         try:
-            wd = webdriver.Chrome() 
+            wd = webdriver.Firefox() 
             loginUrl = 'https://passport.jd.com/new/login.aspx' 
             wd.get(loginUrl)
-            wd.find_element_by_xpath('//*[@id="content"]/div[2]/div[1]/div/div[3]').click()
-            wd.find_element_by_id('loginname').send_keys(login_name)
-            wd.find_element_by_id('nloginpwd').send_keys(login_password)
-            wd.find_element_by_id('loginsubmit').click()
-            time.sleep(3)
-            wd.get_screenshot_as_file('jd_login.png')
-             # 图片地址
-            # vert = wd.find_element_by_id('JD_Verification1').get_attribute('src')
-            # print(vert)
-            # 下载图片
-            # save_img(vert)
-            screen_img()
-            # 解析图片文字并且填如
-            im = Image.open("pic.gif")
-            verification_code = extract_images.extract_image(im)
-            print("当前验证码："+verification_code)
-            if verification_code is not None:
-                wd.find_element_by_id('authcode').send_keys(verification_code)
+            title = '京东-欢迎登录'
+            while(title == '京东-欢迎登录'):
+                wd.find_element_by_xpath('//*[@id="content"]/div[2]/div[1]/div/div[3]').click()
+                wd.find_element_by_id('loginname').send_keys(login_name)
+                wd.find_element_by_id('nloginpwd').send_keys(login_password)
                 wd.find_element_by_id('loginsubmit').click()
-                wd.get('https://item.jd.com/6171814.html')
-                # 点击预约商品
-                wd.find_element_by_id('btn-reservation').click()
-                # req = requests.Session() #构建Session
-                # cookies = wd.get_cookies() #导出cookie
-                # for cookie in cookies:
-                #     req.cookies.set(cookie['name'],cookie['value']) #转换cookies
-                # test = req.get('待测试的链接')
-            else:
-                print('验证码识别错误...')
+                time.sleep(3)
+                wd.get_screenshot_as_file('./jd_login.png')
+                screen_img()
+                # 解析图片文字并且填如
+                im = Image.open("pic.png")
+                extract = code.binarize(im)
+                verification_code = code.extractRe(extract)
+                if verification_code == None:
+                    wd.refresh()
+                else:
+                    print("当前验证码："+verification_code)
+                    if verification_code is not None:
+                        wd.find_element_by_id('authcode').send_keys(verification_code)
+                        wd.find_element_by_id('loginsubmit').click()
+                        title = wd.find_elements_by_xpath('/html/head/title')
+                        wd.get('https://item.jd.com/6171814.html')
+                        # 点击预约商品
+                        wd.find_element_by_id('btn-reservation').click()
+                        # req = requests.Session() #构建Session
+                        # cookies = wd.get_cookies() #导出cookie
+                        # for cookie in cookies:
+                        #     req.cookies.set(cookie['name'],cookie['value']) #转换cookies
+                        # test = req.get('待测试的链接')
+                    else:
+                        print('验证码识别错误...')
         finally:
             wd.close()
 
@@ -75,7 +78,7 @@ def screen_img():
     w = 139
     h = 66
     region = im.crop((x, y, x+w, y+h))
-    region.save("pic.gif")
+    region.save("pic.png")
 
 if __name__ == '__main__':
     login()

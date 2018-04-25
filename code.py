@@ -1,5 +1,6 @@
 import pytesseract as ocr
 from PIL import Image
+import re
 
 
 def binarize(imgCaptcha):
@@ -25,6 +26,16 @@ def binarize(imgCaptcha):
     return image.point(table, '1')
 
 
+def extractRe(image):
+    s = ocr.image_to_string(image, config='-psm 7 ')
+    result = re.findall('[A-Z]+',s)
+    size = len(result)
+    if size == 0:
+        return None
+    else:
+        return result[0]
+
+
 if __name__ == '__main__':
     # image = Image.open('screen_shoot.png')
     # print("图片宽度和高度分别是{}".format(image.size))
@@ -32,5 +43,5 @@ if __name__ == '__main__':
     # image.save("crop.png")
 
     img = Image.open('pic.gif')
-    binarize(img).save("ddd.png")
-    print(ocr.image_to_string(binarize(img), config='-psm 7 '))
+    img = binarize(img)
+    extractRe(img)
