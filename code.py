@@ -27,13 +27,15 @@ def binarize(imgCaptcha):
 
 
 def extractRe(image):
-    s = ocr.image_to_string(image, config='-psm 7 ')
-    result = re.findall('[A-Z]+',s)
-    size = len(result)
-    if size == 0:
+    # s = ocr.image_to_string(image)
+    s = ocr.image_to_string(image, config='-psm 7')
+    print(s)
+    result = re.findall('^[a-zA-Z0-9]+$',s)
+    if len(result) < 4:
         return None
     else:
-        return result[0]
+        print(result)
+        return result
 
 
 if __name__ == '__main__':

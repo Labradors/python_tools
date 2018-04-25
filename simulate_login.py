@@ -1,5 +1,8 @@
 import requests
 from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from PIL import Image
 import json
 import os
@@ -25,7 +28,11 @@ def login():
         login_name = account_dist['username']
         login_password = account_dist['password']
         try:
-            wd = webdriver.Firefox() 
+            __options = webdriver.ChromeOptions()
+            __options.add_argument(
+            'user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36"')
+            wd = webdriver.Chrome(chrome_options=__options)
+            wd.set_window_size(398, 798) 
             loginUrl = 'https://passport.jd.com/new/login.aspx' 
             wd.get(loginUrl)
             title = '京东-欢迎登录'
@@ -35,12 +42,13 @@ def login():
                 wd.find_element_by_id('nloginpwd').send_keys(login_password)
                 wd.find_element_by_id('loginsubmit').click()
                 time.sleep(3)
-                wd.get_screenshot_as_file('./jd_login.png')
-                screen_img()
-                # 解析图片文字并且填如
-                im = Image.open("pic.png")
-                extract = code.binarize(im)
-                verification_code = code.extractRe(extract)
+                # wd.get_screenshot_as_file('./jd_login.png')
+                # screen_img()
+                # # 解析图片文字并且填如
+                # im = Image.open("pic.png")
+                # extract = code.binarize(im)
+                # verification_code = code.extractRe(extract)
+                verification_code = verification()
                 if verification_code == None:
                     wd.refresh()
                 else:
@@ -48,10 +56,17 @@ def login():
                     if verification_code is not None:
                         wd.find_element_by_id('authcode').send_keys(verification_code)
                         wd.find_element_by_id('loginsubmit').click()
+                        time.sleep(0.5)
                         title = wd.find_elements_by_xpath('/html/head/title')
-                        wd.get('https://item.jd.com/6171814.html')
+                        time.sleep(2)
+                        # 进入订单列表界面
+                        wd.find_element_by_css_selector('#ttbar-login > div.dt.cw-icon > a').click()
+                        time.sleep(5)
+                        # 进入我的预约界面
+                        wd.find_element_by_css_selector('#_MYJD_yushou > a').click()
+                        time.sleep(20)
                         # 点击预约商品
-                        wd.find_element_by_id('btn-reservation').click()
+                        # wd.find_element_by_id('btn-reservation').click()
                         # req = requests.Session() #构建Session
                         # cookies = wd.get_cookies() #导出cookie
                         # for cookie in cookies:
@@ -67,16 +82,20 @@ def save_img(url):
     with open('pic.png', 'wb') as file:
         file.write(img.content)
 
+def verification():
+    x = input('请输入验证码： ')
+    return x
+
 
 def screen_img():
     im = Image.open("jd_login.png")
     img_size = im.size
     print("图片宽度和高度分别是{}".format(img_size))
     # 截取图片中一块宽和高都是250的
-    x = 1890
-    y = 754
-    w = 139
-    h = 66
+    x = 497
+    y = 861
+    w = 107
+    h = 59
     region = im.crop((x, y, x+w, y+h))
     region.save("pic.png")
 
