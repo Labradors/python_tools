@@ -32,7 +32,6 @@ def login():
             __options.add_argument(
             'user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36"')
             wd = webdriver.Chrome(chrome_options=__options)
-            wd.set_window_size(398, 798) 
             loginUrl = 'https://passport.jd.com/new/login.aspx' 
             wd.get(loginUrl)
             title = '京东-欢迎登录'
@@ -48,32 +47,38 @@ def login():
                 # im = Image.open("pic.png")
                 # extract = code.binarize(im)
                 # verification_code = code.extractRe(extract)
-                verification_code = verification()
-                if verification_code == None:
-                    wd.refresh()
-                else:
-                    print("当前验证码："+verification_code)
-                    if verification_code is not None:
-                        wd.find_element_by_id('authcode').send_keys(verification_code)
-                        wd.find_element_by_id('loginsubmit').click()
-                        time.sleep(0.5)
-                        title = wd.find_elements_by_xpath('/html/head/title')
-                        time.sleep(2)
-                        # 进入订单列表界面
-                        wd.find_element_by_css_selector('#ttbar-login > div.dt.cw-icon > a').click()
-                        time.sleep(5)
-                        # 进入我的预约界面
-                        wd.find_element_by_css_selector('#_MYJD_yushou > a').click()
-                        time.sleep(20)
-                        # 点击预约商品
-                        # wd.find_element_by_id('btn-reservation').click()
-                        # req = requests.Session() #构建Session
-                        # cookies = wd.get_cookies() #导出cookie
-                        # for cookie in cookies:
-                        #     req.cookies.set(cookie['name'],cookie['value']) #转换cookies
-                        # test = req.get('待测试的链接')
+                title = wd.find_elements_by_xpath('/html/head/title')
+                if title == '京东-欢迎登录':
+                    verification_code = verification()
+                    if verification_code == None:
+                        wd.refresh()
                     else:
-                        print('验证码识别错误...')
+                        print("当前验证码："+verification_code)
+                        if verification_code is not None:
+                            wd.find_element_by_id('authcode').send_keys(verification_code)
+                            wd.find_element_by_id('loginsubmit').click()
+                            time.sleep(0.5)
+                            title = wd.find_elements_by_xpath('/html/head/title')
+                            time.sleep(2)
+                            # 进入订单列表界面
+                            # wd.find_element_by_css_selector('#ttbar-login > div.dt.cw-icon > a').click()
+                            # time.sleep(5)
+                            # 进入我的预约界面
+                            # wd.find_element_by_css_selector('#_MYJD_yushou > a').click()
+                            wd.get('https://yushou.jd.com/member/qualificationList.action')
+                            time.sleep(20)
+                            # 点击预约商品
+                            # wd.find_element_by_id('btn-reservation').click()
+                            # req = requests.Session() #构建Session
+                            # cookies = wd.get_cookies() #导出cookie
+                            # for cookie in cookies:
+                            #     req.cookies.set(cookie['name'],cookie['value']) #转换cookies
+                            # test = req.get('待测试的链接')
+                        else:
+                            print('验证码识别错误...')
+                else:
+                     wd.get('https://yushou.jd.com/member/qualificationList.action')
+                     time.sleep(20)
         finally:
             wd.close()
 
